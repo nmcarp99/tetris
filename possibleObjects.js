@@ -4,9 +4,9 @@ var possibleObjects = [
     falling: true,
     position: startPosition,
     relativePositions: [
-      [[-2, 0], [-1, 0], [0, 0], [1, 0]], // 0deg
+      [[-2, 1], [-1, 1], [0, 1], [1, 1]], // 0deg
       [[0, 2], [0, 1], [0, 0], [0, -1]], // 90deg (from 0 deg, multiply the x by -1, then flip the x and y)
-      [[-2, 0], [-1, 0], [0, 0], [1, 0]], // 180deg (from 0 deg, multiply the x by -1, then multiply the y by -1)
+      [[-2, 1], [-1, 1], [0, 1], [1, 1]], // 180deg (from 0 deg, multiply the x by -1, then multiply the y by -1)
       [[0, 2], [0, 1], [0, 0], [0, -1]], // 270deg (from 0 deg, multiply the y by -1, then flip the x and y)
     ],
     relativePositionsIndex: 0,
