@@ -12,6 +12,7 @@ var updateInterval;
 var lastCreatedObjectIndex;
 var dimBox;
 var possibleObjects;
+var nextObject;
 
 const classroomIconUrl =
   "https://cdn.glitch.me/61845a2e-50dd-416e-b27c-f6c4d479d0ad%2Ffavicon.png?v=1633720408561";
@@ -31,8 +32,8 @@ window.addEventListener("blur", () => {
   }
 });
 
-window.addEventListener('message', event => {
-  handleKeyPress({code: event.data});
+window.addEventListener("message", event => {
+  handleKeyPress({ code: event.data });
 });
 
 function checkSchoolHours(force = false) {
@@ -69,8 +70,10 @@ function checkSchoolHours(force = false) {
 }
 
 function openInWindow() {
-  let url = prompt("What url would you like the control window to open to?\n(Leave blank for Google Classroom)");
-  
+  let url = prompt(
+    "What url would you like the control window to open to?\n(Leave blank for Google Classroom)"
+  );
+
   if (url == "") {
     url = "https://classroom.google.com/h";
   } else if (!url.startsWith("http")) {
@@ -81,11 +84,11 @@ function openInWindow() {
 }
 
 function handleKeyPress(e) {
-  if (objects.length == 0) {    
+  if (objects.length == 0) {
     if (e.code == "Space" || e.code == "Enter") {
       start();
     }
-    
+
     return;
   }
 
@@ -104,7 +107,10 @@ function handleKeyPress(e) {
     objects[lastCreatedObjectIndex].position[1] += getFallLevel(
       lastCreatedObjectIndex
     );
+
     draw();
+
+    update();
     return;
   } else if (e.code == "KeyQ") {
     rotate(1);
@@ -132,7 +138,22 @@ function handleKeyPress(e) {
   draw();
 }
 
+function getSmallestPosition(object, direction) {  
+  let relativePositions = object.relativePositions[object.relativePositionsIndex];
+  
+  let farthestPosition = Infinity;
+  
+  for (var i = 0; i < relativePositions.length; i++) {
+    if (relativePositions[i][direction] < farthestPosition) {
+      farthestPosition = relativePositions[i][0];
+    }
+  }
+  
+  return farthestPosition;
+}
+
 function draw() {
+  nextCanvasContext.lineWidth = 4;
   canvasContext.lineWidth = 4;
   canvasContext.clearRect(0, 0, canvas.width, canvas.height); // clear the canvas
 
@@ -143,14 +164,13 @@ function draw() {
     canvasContext.fillStyle = object.color;
     canvasContext.strokeStyle = object.borderColor;
 
-
     let relativePositions =
       object.relativePositions[object.relativePositionsIndex];
 
     for (var j = 0; j < relativePositions.length; j++) {
       // loop through all of the squares in the shape (object)
       let blockPosition = relativePositions[j];
-      
+
       canvasContext.beginPath();
 
       canvasContext.rect(
@@ -159,9 +179,9 @@ function draw() {
         30,
         30
       ); // add a square in the position of a part of the piece we are currently drawing (object)
-      
+
       canvasContext.fill(); // fill the current path
-      
+
       canvasContext.beginPath();
 
       canvasContext.rect(
@@ -170,33 +190,72 @@ function draw() {
         26,
         26
       ); // add a square in the position of a part of the piece we are currently drawing (object)
-      
+
       canvasContext.stroke(); // draw the outline
     }
-
   }
-  
+
   // draw the ghost image
-  
+
   let object = objects[lastCreatedObjectIndex];
-  
-  let relativePositions = object.relativePositions[object.relativePositionsIndex];
-  
+
+  let relativePositions =
+    object.relativePositions[object.relativePositionsIndex];
+
   for (var i = 0; i < relativePositions.length; i++) {
     let blockPosition = relativePositions[i];
-    
+
     canvasContext.strokeStyle = object.backgroundColor;
-    
+
     canvasContext.beginPath();
-    
+
     canvasContext.rect(
       (object.position[0] + blockPosition[0]) * 30 + 2,
-      (object.position[1] + blockPosition[1] + getFallLevel(lastCreatedObjectIndex)) * 30 + 2,
+      (object.position[1] +
+        blockPosition[1] +
+        getFallLevel(lastCreatedObjectIndex)) *
+        30 +
+        2,
       26,
       26
     );
-    
+
     canvasContext.stroke();
+  }
+
+  nextCanvasContext.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+
+  relativePositions =
+    nextObject.relativePositions[nextObject.relativePositionsIndex];
+
+  for (var i = 0; i < relativePositions.length; i++) {
+    // loop through all of the squares in the shape (object)
+    let blockPosition = relativePositions[i];
+
+    nextCanvasContext.strokeStyle = nextObject.borderColor;
+    nextCanvasContext.fillStyle = nextObject.color;
+
+    nextCanvasContext.beginPath();
+
+    nextCanvasContext.rect(
+      (blockPosition[0] - getSmallestPosition(nextObject, 0)) * 30,
+      (blockPosition[1]) * 30,
+      30,
+      30
+    ); // add a square in the position of a part of the piece we are currently drawing (object)
+
+    nextCanvasContext.fill(); // fill the current path
+
+    nextCanvasContext.beginPath();
+
+    nextCanvasContext.rect(
+      (blockPosition[0] - getSmallestPosition(nextObject, 0)) * 30 + 2, // the 2 is to account for the border being on both sides of the path (2 is half of the linewidth)
+      (blockPosition[1]) * 30 + 2,
+      26,
+      26
+    ); // add a square in the position of a part of the piece we are currently drawing (object)
+
+    nextCanvasContext.stroke(); // draw the outline
   }
 }
 
@@ -206,23 +265,31 @@ function reset() {
 
 function die() {
   clearInterval(updateInterval);
-  
+
   reset();
-  
+
   dimBox.style.display = "";
 }
 
-function spawnObject() {
-  objects.push(
-    JSON.parse(
-      JSON.stringify(
-        possibleObjects[Math.floor(Math.random() * possibleObjects.length)]
-      )
+function getNextObject() {
+  nextObject = JSON.parse(
+    JSON.stringify(
+      possibleObjects[Math.floor(Math.random() * possibleObjects.length)]
     )
-  ); // add a new object to the objects list. Create a new object with the same values instead of accesing the same piece of memory.
+  );
+}
+
+function spawnObject() {
+  if (nextObject == null) {
+    getNextObject();
+  }
+
+  objects.push(JSON.parse(JSON.stringify(nextObject))); // add a new object to the objects list. Create a new object with the same values instead of accesing the same piece of memory.
+
+  getNextObject();
 
   lastCreatedObjectIndex = objects.length - 1;
-  
+
   if (checkObjectTrajectory(lastCreatedObjectIndex, [0, 0])) {
     die();
   }
@@ -390,7 +457,7 @@ function checkRowFull() {
 function update() {
   // move the objects to where they go
   let startObjectLength = objects.length;
-  
+
   for (var i = 0; i < startObjectLength; i++) {
     // loop through all objects
 
@@ -402,7 +469,7 @@ function update() {
         checkRowFull();
 
         spawnObject();
-        
+
         console.log(objects.length);
       }
 
@@ -417,7 +484,7 @@ function update() {
 
 function start() {
   dimBox.style.display = "none";
-  
+
   spawnObject();
   update();
   updateInterval = setInterval(update, delay);
@@ -520,11 +587,31 @@ function updateCheckOption(object, optionName) {
 }
 
 function generateBlockColorOptions(url, letter, color, altColor) {
-  return `
-    <img src='` + url + `' class='blockDiagram' /><br>
-    <label for="` + letter + `Color">Color</label><input value="` + color + `" onchange="updateSliderOption(this, '` + letter + `Color')" id="` + letter + `Color" type="color"><br>
-    <label for="` + letter + `BorderColor">Border Color</label><input value="` + altColor + `" onchange="updateSliderOption(this, '` + letter + `BorderColor')" id="` + letter + `BorderColor" type="color"><br><br>
+  return (
+    `
+    <img src='` +
+    url +
+    `' class='blockDiagram' /><br>
+    <label for="` +
+    letter +
+    `Color">Color</label><input value="` +
+    color +
+    `" onchange="updateSliderOption(this, '` +
+    letter +
+    `Color')" id="` +
+    letter +
+    `Color" type="color"><br>
+    <label for="` +
+    letter +
+    `BorderColor">Border Color</label><input value="` +
+    altColor +
+    `" onchange="updateSliderOption(this, '` +
+    letter +
+    `BorderColor')" id="` +
+    letter +
+    `BorderColor" type="color"><br><br>
   `
+  );
 }
 
 function loadColorValue(name, defaultColor) {
@@ -534,48 +621,83 @@ function loadColorValue(name, defaultColor) {
 
 function setColorValue(name, object) {
   if (getCookie(name) === undefined) return;
-  
+
   object.color = getCookie(name);
 }
 
 function setBackgroundColorValue(name, object) {
   if (getCookie(name) === undefined) return;
-  
+
   object.backgroundColor = getCookie(name);
 }
 
 function blockOptions() {
   $("#optionsContent").html(
-    generateBlockColorOptions('https://cdn.glitch.me/caeb91db-3a89-4b7b-aeb9-5db17fab57c6%2FI.png?v=1635117748498', 'i', '#00FFFF', '#00CCCC') + 
-    generateBlockColorOptions('https://cdn.glitch.me/caeb91db-3a89-4b7b-aeb9-5db17fab57c6%2FJ.png?v=1635117723853', 'j', '#0000FF', '#0000CC') + 
-    generateBlockColorOptions('https://cdn.glitch.me/caeb91db-3a89-4b7b-aeb9-5db17fab57c6%2FL.png?v=1635117732997', 'l', '#FFA500', '#CC7200') + 
-    generateBlockColorOptions('https://cdn.glitch.me/caeb91db-3a89-4b7b-aeb9-5db17fab57c6%2FO.png?v=1635117742983', 'o', '#FFFF00', '#CCCC00') + 
-    generateBlockColorOptions('https://cdn.glitch.me/caeb91db-3a89-4b7b-aeb9-5db17fab57c6%2FS.png?v=1635117728603', 's', '#00FF00', '#00CC00') + 
-    generateBlockColorOptions('https://cdn.glitch.me/caeb91db-3a89-4b7b-aeb9-5db17fab57c6%2FZ.png?v=1635117718087', 'z', '#FF0000', '#CC0000') + 
-    generateBlockColorOptions('https://cdn.glitch.me/caeb91db-3a89-4b7b-aeb9-5db17fab57c6%2FT.png?v=1635117737825', 't', '#FF00FF', '#CC00CC')
+    generateBlockColorOptions(
+      "https://cdn.glitch.me/caeb91db-3a89-4b7b-aeb9-5db17fab57c6%2FI.png?v=1635117748498",
+      "i",
+      "#00FFFF",
+      "#00CCCC"
+    ) +
+      generateBlockColorOptions(
+        "https://cdn.glitch.me/caeb91db-3a89-4b7b-aeb9-5db17fab57c6%2FJ.png?v=1635117723853",
+        "j",
+        "#0000FF",
+        "#0000CC"
+      ) +
+      generateBlockColorOptions(
+        "https://cdn.glitch.me/caeb91db-3a89-4b7b-aeb9-5db17fab57c6%2FL.png?v=1635117732997",
+        "l",
+        "#FFA500",
+        "#CC7200"
+      ) +
+      generateBlockColorOptions(
+        "https://cdn.glitch.me/caeb91db-3a89-4b7b-aeb9-5db17fab57c6%2FO.png?v=1635117742983",
+        "o",
+        "#FFFF00",
+        "#CCCC00"
+      ) +
+      generateBlockColorOptions(
+        "https://cdn.glitch.me/caeb91db-3a89-4b7b-aeb9-5db17fab57c6%2FS.png?v=1635117728603",
+        "s",
+        "#00FF00",
+        "#00CC00"
+      ) +
+      generateBlockColorOptions(
+        "https://cdn.glitch.me/caeb91db-3a89-4b7b-aeb9-5db17fab57c6%2FZ.png?v=1635117718087",
+        "z",
+        "#FF0000",
+        "#CC0000"
+      ) +
+      generateBlockColorOptions(
+        "https://cdn.glitch.me/caeb91db-3a89-4b7b-aeb9-5db17fab57c6%2FT.png?v=1635117737825",
+        "t",
+        "#FF00FF",
+        "#CC00CC"
+      )
   );
-  
+
   loadColorValue("iColor", "#00FFFF");
   loadColorValue("iBorderColor", "#00CCCC");
-  
+
   loadColorValue("jColor", "#0000FF");
   loadColorValue("jBorderColor", "#0000CC");
-  
+
   loadColorValue("lColor", "#FFA500");
   loadColorValue("lBorderColor", "#CC7200");
-  
+
   loadColorValue("oColor", "#FFFF00");
   loadColorValue("oBorderColor", "#CCCC00");
-  
+
   loadColorValue("sColor", "#00FF00");
   loadColorValue("sBorderColor", "#00CC00");
-  
+
   loadColorValue("zColor", "#FF0000");
   loadColorValue("zBorderColor", "#CC0000");
-  
+
   loadColorValue("tColor", "#FF00FF");
   loadColorValue("tBorderColor", "#CC00CC");
-  
+
   document.getElementById("blockOptions").style.backgroundColor = "gray";
   document.getElementById("otherOptions").style.backgroundColor = "";
 }
@@ -606,7 +728,7 @@ function loadCookies() {
   setColorValue("sColor", possibleObjects[4]);
   setColorValue("tColor", possibleObjects[5]);
   setColorValue("zColor", possibleObjects[6]);
-  
+
   setBackgroundColorValue("iBackgroundColor", possibleObjects[0]);
   setBackgroundColorValue("jBackgroundColor", possibleObjects[1]);
   setBackgroundColorValue("lBackgroundColor", possibleObjects[2]);
@@ -619,13 +741,20 @@ function loadCookies() {
 $(() => {
   canvas = document.getElementById("canvas");
   canvasContext = canvas.getContext("2d");
+
+  holdingCanvas = document.getElementById("holdingCanvas");
+  holdingCanvasContext = holdingCanvas.getContext("2d");
+
+  nextCanvas = document.getElementById("nextCanvas");
+  nextCanvasContext = nextCanvas.getContext("2d");
+
   dimBox = document.getElementById("dimBox");
-  
+
   loadCookies(); // load all cookies into variables
 
   checkSchoolHours();
-  
+
   reset(); // reset all the components
-  
+
   blockOptions(); // open the block options
 });
