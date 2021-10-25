@@ -1,11 +1,145 @@
-canvas {
-  border: 5px solid black;
-  border-radius: 5px;
-  margin-left: calc(50% - 150px);
+label {
+  font-family: arial;
+  font-size: 30px;
+  margin: 15px;
+}
+
+input[type="checkbox"] {
+  width: 30px;
+  height: 30px;
+  margin: 15px;
+  vertical-align: sub;
+}
+
+input[type="number"] {
+  width: 30px;
+  height: 30px;
+  margin: 15px;
+  vertical-align: super;
+}
+
+input[type="color"] {
+  width: 50px;
+  height: 30px;
+  margin: 15px;
+  border: none;
+  padding: 0;
+}
+
+select {
+  width: 125px;
+  height: 30px;
+  vertical-align: top;
+  margin-left: -10px;
 }
 
 h1 {
   text-align: center;
   font-family: arial;
-  margin-bottom: 100px;
+}
+
+.canvas {
+  border: 5px solid black;
+  border-radius: 5px;
+  display: inline-block;
+}
+
+.middleCanvas {
+}
+
+.holdingCanvas {
+  margin-left: calc(50% - ((300px / 2) + 120px));
+  display: inline-block;
+}
+
+.optionsBox {
+  width: 30vw;
+  height: 85vh;
+  background-color: white;
+  box-shadow: 0 0 10px black;
+  position: absolute;
+  margin-left: calc(50% - (30vw / 2));
+  top: calc(50% - (85vh / 2));
+  border-radius: 10px;
+}
+
+.dimBox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #00000080;
+  width: 100%;
+  height: 100%;
+}
+
+.optionsTab {
+  border: 1px solid gray;
+  border-bottom: none;
+  margin-left: 0;
+  background-color: white;
+  display: inline-block;
+  border-radius: 5px 5px 0 0;
+  font-size: 1.5vw;
+  padding: 5px 10px 0 10px;
+}
+
+.optionsTab:hover {
+  background-color: darkgray;
+}
+
+.optionsTab:active {
+  background-color: gray;
+}
+
+.optionsContent {
+  background-color: whitesmoke;
+  width: calc(100% - 40px);
+  height: 60%;
+  margin-left: 20px;
+  margin-right: 20px;
+  border: 1px solid gray;
+  border-radius: 5px;
+  overflow-y: scroll;
+}
+
+.start {
+  width: 70%;
+  height: 60px;
+  margin-left: 15%;
+  margin-top: 20px;
+  border: none;
+  background-color: #309FFF;
+  color: white;
+  font-size: 30px;
+  border-radius: 15px;
+}
+
+.start:hover {
+  background-color: #2681d1;
+}
+
+.start:active {
+  background-color: #195991;
+}
+
+.controlWindow {
+  margin-left: calc(50% - 100px)
+}
+
+.blockDiagram {
+  margin-left: 10px;
+  width: 25%;
+}
+
+@media only screen and (max-width: 950px) {
+  .optionsBox {
+    width: 100vw;
+    height: 85vh;
+    margin-left: calc(50% - (100vw / 2));
+    top: calc(50% - (85vh / 2));
+  }
+  
+  .optionsTab {
+    font-size: 5vw;
+  }
 }
