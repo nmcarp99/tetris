@@ -1,5 +1,5 @@
 const startPosition = [5, -2];
-const possibleObjects = [
+var possibleObjects = [
   {
     falling: true,
     position: startPosition,
@@ -10,7 +10,8 @@ const possibleObjects = [
       [[0, 2], [0, 1], [0, 0], [0, -1]], // 270deg (from 0 deg, multiply the y by -1, then flip the x and y)
     ],
     relativePositionsIndex: 0,
-    color: "#00FFFF"
+    color: "#00FFFF",
+    borderColor: "#00CCCC"
   }, // I
   {
     falling: true,
@@ -22,7 +23,8 @@ const possibleObjects = [
       [[0, -1], [-1, -1], [-1, 0], [-1, 1]]
     ],
     relativePositionsIndex: 0,
-    color: "#0000FF"
+    color: "#0000FF",
+    borderColor: "#0000CC"
   }, // J
   {
     falling: true,
@@ -34,7 +36,8 @@ const possibleObjects = [
       [[0, 1], [-1, -1], [-1, 0], [-1, 1]]
     ],
     relativePositionsIndex: 0,
-    color: "#FFA500"
+    color: "#FFA500",
+    borderColor: "#CC7200"
   }, // L
   {
     falling: true,
@@ -46,7 +49,8 @@ const possibleObjects = [
       [[-1, 0], [0, 0], [-1, 1], [0, 1]]
     ],
     relativePositionsIndex: 0,
-    color: "#FFFF00"
+    color: "#FFFF00",
+    borderColor: "#CCCC00"
   }, // O
   {
     falling: true,
@@ -58,7 +62,8 @@ const possibleObjects = [
       [[0, 0], [0, -1], [1, 1], [1, 0]]
     ],
     relativePositionsIndex: 0,
-    color: "#00FF00"
+    color: "#00FF00",
+    borderColor: "#00CC00"
   }, // S
   {
     falling: true,
@@ -70,7 +75,8 @@ const possibleObjects = [
       [[0, 0], [-1, -1], [-1, 0], [-1, 1]]
     ],
     relativePositionsIndex: 0,
-    color: "#FF00FF"
+    color: "#FF00FF",
+    borderColor: "#CC00CC"
   }, // T
   {
     falling: true,
@@ -82,6 +88,7 @@ const possibleObjects = [
       [[0, 1], [0, 0], [1, 0], [1, -1]]
     ],
     relativePositionsIndex: 0,
-    color: "#FF0000"
+    color: "#FF0000",
+    borderColor: "#CC0000"
   } // Z
 ]; // put all possible shape objects here

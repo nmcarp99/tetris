@@ -1,17 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Tetris</title>
+    <title id="tabTitle">Tetris</title>
     
     <link rel="stylesheet" href="style.css" />
-    <link rel="icon" href="https://cdn.glitch.me/caeb91db-3a89-4b7b-aeb9-5db17fab57c6%2FScreenshot%20(2).jpg?v=1635000317703" />
+    <link id="icon" rel="icon" href="https://cdn.glitch.me/caeb91db-3a89-4b7b-aeb9-5db17fab57c6%2FScreenshot%20(2).jpg?v=1635000317703" />
     
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script src="possibleObjects.js"></script>
     <script src="script.js"></script>
   </head>
   <body>
-    <h1>Tetris</h1>
-    <canvas id="canvas" width="300" height="450"></canvas>
+    <h1 style="margin-bottom: 75px;">Tetris</h1>
+    <canvas id="holdingCanvas" width="120", height="60" class="canvas holdingCanvas"></canvas>
+    <canvas id="canvas" width="300" height="450" class="canvas middleCanvas"></canvas>
+    <canvas id="nextCanvas" width="120", height="60" class="canvas"></canvas>
+    
+    <div class="dimBox" id="dimBox">
+      <div class="optionsBox">
+        <h1>
+          Options
+        </h1>
+        <div>
+          <button
+            id="blockOptions"
+            onclick="blockOptions()"
+            type="button"
+            style="margin-left: 30px; background-color: gray"
+            class="optionsTab"
+          >
+            Blocks
+          </button>
+          <button
+            id="otherOptions"
+            onclick="otherOptions()"
+            type="button"
+            class="optionsTab"
+          >
+            Other
+          </button>
+        </div>
+        <div class="optionsContent" id="optionsContent"></div>
+        <button type="button" class="start" onclick="start()">
+          Play
+        </button>
+      </div>
+    </div>
   </body>
 </html>
