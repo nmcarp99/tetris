@@ -1,8 +1,8 @@
-const startPosition = [5, -2];
+var objectStartPos = [5, -2];
 var possibleObjects = [
   {
     falling: true,
-    position: startPosition,
+    position: objectStartPos,
     relativePositions: [
       [[-2, 1], [-1, 1], [0, 1], [1, 1]], // 0deg
       [[0, 2], [0, 1], [0, 0], [0, -1]], // 90deg (from 0 deg, multiply the x by -1, then flip the x and y)
@@ -15,7 +15,7 @@ var possibleObjects = [
   }, // I
   {
     falling: true,
-    position: startPosition,
+    position: objectStartPos,
     relativePositions: [
       [[-1, 0], [-1, 1], [0, 1], [1, 1]],
       [[0, 1], [1, 1], [1, 0], [1, -1]],
@@ -28,7 +28,7 @@ var possibleObjects = [
   }, // J
   {
     falling: true,
-    position: startPosition,
+    position: objectStartPos,
     relativePositions: [
       [[1, 0], [-1, 1], [0, 1], [1, 1]],
       [[0, -1], [1, 1], [1, 0], [1, -1]],
@@ -41,7 +41,7 @@ var possibleObjects = [
   }, // L
   {
     falling: true,
-    position: startPosition,
+    position: objectStartPos,
     relativePositions: [
       [[-1, 0], [0, 0], [-1, 1], [0, 1]],
       [[-1, 0], [0, 0], [-1, 1], [0, 1]],
@@ -54,7 +54,7 @@ var possibleObjects = [
   }, // O
   {
     falling: true,
-    position: startPosition,
+    position: objectStartPos,
     relativePositions: [
       [[0, 0], [1, 0], [-1, 1], [0, 1]],
       [[0, 0], [0, -1], [1, 1], [1, 0]],
@@ -67,7 +67,7 @@ var possibleObjects = [
   }, // S
   {
     falling: true,
-    position: startPosition,
+    position: objectStartPos,
     relativePositions: [
       [[0, 0], [-1, 1], [0, 1], [1, 1]],
       [[0, 0], [1, 1], [1, 0], [1, -1]],
@@ -80,7 +80,7 @@ var possibleObjects = [
   }, // T
   {
     falling: true,
-    position: startPosition,
+    position: objectStartPos,
     relativePositions: [
       [[-1, 0], [0, 0], [0, 1], [1, 1]],
       [[0, 1], [0, 0], [1, 0], [1, -1]],

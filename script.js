@@ -15,6 +15,7 @@ var possibleObjects;
 var nextObject;
 var swappedThisBlock;
 var swapObject;
+var objectStartPos;
 
 const classroomIconUrl =
   "https://cdn.glitch.me/61845a2e-50dd-416e-b27c-f6c4d479d0ad%2Ffavicon.png?v=1633720408561";
@@ -128,6 +129,14 @@ function handleKeyPress(e) {
     return;
   } else if (e.code == "KeyC") {
     swap();
+    
+    draw();
+
+    return;
+  } else if (e.code == "Escape") {
+    die();
+
+    return;
   } else {
     return;
   }
@@ -160,7 +169,10 @@ function getSmallestPosition(object, direction) {
 function draw() {
   nextCanvasContext.lineWidth = 4;
   canvasContext.lineWidth = 4;
-  canvasContext.clearRect(0, 0, canvas.width, canvas.height); // clear the canvas
+  
+  canvasContext.clearRect(0, 0, canvas.width, canvas.height); // clear the canvases
+  nextCanvasContext.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+  holdingCanvasContext.clearRect(0, 0, holdingCanvas.width, holdingCanvas.height);
 
   for (var i = 0; i < objects.length; i++) {
     // loop through all of the shapes (objects)
@@ -228,42 +240,40 @@ function draw() {
     canvasContext.stroke();
   }
 
-  nextCanvasContext.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+  if (nextObject != null) {
+    relativePositions =
+      nextObject.relativePositions[nextObject.relativePositionsIndex];
 
-  relativePositions =
-    nextObject.relativePositions[nextObject.relativePositionsIndex];
+    for (var i = 0; i < relativePositions.length; i++) {
+      // loop through all of the squares in the shape (object)
+      let blockPosition = relativePositions[i];
 
-  for (var i = 0; i < relativePositions.length; i++) {
-    // loop through all of the squares in the shape (object)
-    let blockPosition = relativePositions[i];
+      nextCanvasContext.strokeStyle = nextObject.borderColor;
+      nextCanvasContext.fillStyle = nextObject.color;
 
-    nextCanvasContext.strokeStyle = nextObject.borderColor;
-    nextCanvasContext.fillStyle = nextObject.color;
+      nextCanvasContext.beginPath();
 
-    nextCanvasContext.beginPath();
+      nextCanvasContext.rect(
+        (blockPosition[0] - getSmallestPosition(nextObject, 0)) * 30,
+        blockPosition[1] * 30,
+        30,
+        30
+      ); // add a square in the position of a part of the piece we are currently drawing (object)
 
-    nextCanvasContext.rect(
-      (blockPosition[0] - getSmallestPosition(nextObject, 0)) * 30,
-      blockPosition[1] * 30,
-      30,
-      30
-    ); // add a square in the position of a part of the piece we are currently drawing (object)
+      nextCanvasContext.fill(); // fill the current path
 
-    nextCanvasContext.fill(); // fill the current path
+      nextCanvasContext.beginPath();
 
-    nextCanvasContext.beginPath();
+      nextCanvasContext.rect(
+        (blockPosition[0] - getSmallestPosition(nextObject, 0)) * 30 + 2, // the 2 is to account for the border being on both sides of the path (2 is half of the linewidth)
+        blockPosition[1] * 30 + 2,
+        26,
+        26
+      ); // add a square in the position of a part of the piece we are currently drawing (object)
 
-    nextCanvasContext.rect(
-      (blockPosition[0] - getSmallestPosition(nextObject, 0)) * 30 + 2, // the 2 is to account for the border being on both sides of the path (2 is half of the linewidth)
-      blockPosition[1] * 30 + 2,
-      26,
-      26
-    ); // add a square in the position of a part of the piece we are currently drawing (object)
-
-    nextCanvasContext.stroke(); // draw the outline
+      nextCanvasContext.stroke(); // draw the outline
+    }
   }
-
-  holdingCanvasContext.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
 
   if (swapObject != null) {
     relativePositions =
@@ -305,6 +315,7 @@ function reset() {
   objects = [];
   swappedThisBlock = false;
   swapObject = null;
+  nextObject = null;
 }
 
 function die() {
@@ -404,15 +415,30 @@ function swap() {
   if (!swappedThisBlock) {
     if (swapObject == null) {
       swapObject = JSON.parse(JSON.stringify(objects[lastCreatedObjectIndex]));
+
+      // reset the position
+      swapObject.position = objectStartPos;
+
+      // reset the rotation
+      swapObject.relativePositionsIndex = 0;
+
       objects.splice(lastCreatedObjectIndex, 1);
       spawnObject();
     } else {
       let swapObjectCopy = JSON.parse(JSON.stringify(swapObject));
+
       swapObject = JSON.parse(JSON.stringify(objects[lastCreatedObjectIndex]));
+
+      // reset the position
+      swapObject.position = objectStartPos;
+
+      // reset the rotation
+      swapObject.relativePositionsIndex = 0;
+
       objects.splice(lastCreatedObjectIndex, 1);
       objects.push(JSON.parse(JSON.stringify(swapObjectCopy)));
     }
-    
+
     swappedThisBlock = true;
   }
 }
@@ -530,7 +556,7 @@ function update() {
         checkRowFull();
 
         spawnObject();
-        
+
         swappedThisBlock = false;
 
         console.log(objects.length);
