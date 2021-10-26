@@ -13,6 +13,8 @@ var lastCreatedObjectIndex;
 var dimBox;
 var possibleObjects;
 var nextObject;
+var swappedThisBlock;
+var swapObject;
 
 const classroomIconUrl =
   "https://cdn.glitch.me/61845a2e-50dd-416e-b27c-f6c4d479d0ad%2Ffavicon.png?v=1633720408561";
@@ -124,6 +126,8 @@ function handleKeyPress(e) {
     draw();
 
     return;
+  } else if (e.code == "KeyC") {
+    swap();
   } else {
     return;
   }
@@ -138,17 +142,18 @@ function handleKeyPress(e) {
   draw();
 }
 
-function getSmallestPosition(object, direction) {  
-  let relativePositions = object.relativePositions[object.relativePositionsIndex];
-  
+function getSmallestPosition(object, direction) {
+  let relativePositions =
+    object.relativePositions[object.relativePositionsIndex];
+
   let farthestPosition = Infinity;
-  
+
   for (var i = 0; i < relativePositions.length; i++) {
     if (relativePositions[i][direction] < farthestPosition) {
       farthestPosition = relativePositions[i][0];
     }
   }
-  
+
   return farthestPosition;
 }
 
@@ -239,7 +244,7 @@ function draw() {
 
     nextCanvasContext.rect(
       (blockPosition[0] - getSmallestPosition(nextObject, 0)) * 30,
-      (blockPosition[1]) * 30,
+      blockPosition[1] * 30,
       30,
       30
     ); // add a square in the position of a part of the piece we are currently drawing (object)
@@ -250,17 +255,56 @@ function draw() {
 
     nextCanvasContext.rect(
       (blockPosition[0] - getSmallestPosition(nextObject, 0)) * 30 + 2, // the 2 is to account for the border being on both sides of the path (2 is half of the linewidth)
-      (blockPosition[1]) * 30 + 2,
+      blockPosition[1] * 30 + 2,
       26,
       26
     ); // add a square in the position of a part of the piece we are currently drawing (object)
 
     nextCanvasContext.stroke(); // draw the outline
   }
+
+  holdingCanvasContext.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+
+  if (swapObject != null) {
+    relativePositions =
+      swapObject.relativePositions[swapObject.relativePositionsIndex];
+
+    for (var i = 0; i < relativePositions.length; i++) {
+      // loop through all of the squares in the shape (object)
+      let blockPosition = relativePositions[i];
+
+      holdingCanvasContext.strokeStyle = swapObject.borderColor;
+      holdingCanvasContext.fillStyle = swapObject.color;
+
+      holdingCanvasContext.beginPath();
+
+      holdingCanvasContext.rect(
+        (blockPosition[0] - getSmallestPosition(swapObject, 0)) * 30,
+        blockPosition[1] * 30,
+        30,
+        30
+      ); // add a square in the position of a part of the piece we are currently drawing (object)
+
+      holdingCanvasContext.fill(); // fill the current path
+
+      holdingCanvasContext.beginPath();
+
+      holdingCanvasContext.rect(
+        (blockPosition[0] - getSmallestPosition(swapObject, 0)) * 30 + 2, // the 2 is to account for the border being on both sides of the path (2 is half of the linewidth)
+        blockPosition[1] * 30 + 2,
+        26,
+        26
+      ); // add a square in the position of a part of the piece we are currently drawing (object)
+
+      holdingCanvasContext.stroke(); // draw the outline
+    }
+  }
 }
 
 function reset() {
   objects = [];
+  swappedThisBlock = false;
+  swapObject = null;
 }
 
 function die() {
@@ -354,6 +398,23 @@ function checkObjectTrajectory(
   }
 
   return false;
+}
+
+function swap() {
+  if (!swappedThisBlock) {
+    if (swapObject == null) {
+      swapObject = JSON.parse(JSON.stringify(objects[lastCreatedObjectIndex]));
+      objects.splice(lastCreatedObjectIndex, 1);
+      spawnObject();
+    } else {
+      let swapObjectCopy = JSON.parse(JSON.stringify(swapObject));
+      swapObject = JSON.parse(JSON.stringify(objects[lastCreatedObjectIndex]));
+      objects.splice(lastCreatedObjectIndex, 1);
+      objects.push(JSON.parse(JSON.stringify(swapObjectCopy)));
+    }
+    
+    swappedThisBlock = true;
+  }
 }
 
 function deleteRow(row) {
@@ -469,6 +530,8 @@ function update() {
         checkRowFull();
 
         spawnObject();
+        
+        swappedThisBlock = false;
 
         console.log(objects.length);
       }
