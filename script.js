@@ -62,7 +62,7 @@ function checkSchoolHours(force = false) {
         force ||
         getCookie("disguiseTab") == "on" ||
         confirm(
-          "You are playing snake during school hours.\nWould you like to disguise this tab as a google classroom window?"
+          "You are playing tetris during school hours.\nWould you like to disguise this tab as a google classroom window?"
         )
       ) {
         document.getElementById("icon").href = classroomIconUrl;
