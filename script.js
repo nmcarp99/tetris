@@ -1,6 +1,10 @@
+const decreaseRate = 35;
+const minimumSpeed = 50;
+const startSpeed = 750;
+
 var mapWidth = 10;
 var mapHeight = 15;
-var delay = 500;
+var delay;
 var canvas;
 var canvasContext;
 var holdingCanvas;
@@ -16,6 +20,10 @@ var nextObject;
 var swappedThisBlock;
 var swapObject;
 var objectStartPos;
+
+var score;
+var level;
+var linesClearedInLevel;
 
 const classroomIconUrl =
   "https://cdn.glitch.me/61845a2e-50dd-416e-b27c-f6c4d479d0ad%2Ffavicon.png?v=1633720408561";
@@ -129,7 +137,7 @@ function handleKeyPress(e) {
     return;
   } else if (e.code == "KeyC") {
     swap();
-    
+
     draw();
 
     return;
@@ -169,10 +177,16 @@ function getSmallestPosition(object, direction) {
 function draw() {
   nextCanvasContext.lineWidth = 4;
   canvasContext.lineWidth = 4;
-  
+  holdingCanvasContext.lineWidth = 4;
+
   canvasContext.clearRect(0, 0, canvas.width, canvas.height); // clear the canvases
   nextCanvasContext.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
-  holdingCanvasContext.clearRect(0, 0, holdingCanvas.width, holdingCanvas.height);
+  holdingCanvasContext.clearRect(
+    0,
+    0,
+    holdingCanvas.width,
+    holdingCanvas.height
+  );
 
   for (var i = 0; i < objects.length; i++) {
     // loop through all of the shapes (objects)
@@ -316,6 +330,10 @@ function reset() {
   swappedThisBlock = false;
   swapObject = null;
   nextObject = null;
+  score = 0;
+  level = 0;
+  linesClearedInLevel = 0;
+  delay = startSpeed;
 }
 
 function die() {
@@ -537,11 +555,15 @@ function checkRowFull() {
       deleteRow(i);
 
       splitObjects(i);
+
+      return true;
     }
   }
 }
 
 function update() {
+  let linesCleared = 0;
+
   // move the objects to where they go
   let startObjectLength = objects.length;
 
@@ -553,7 +575,18 @@ function update() {
         lastCreatedObjectIndex = null;
         objects[i].falling = false;
 
-        checkRowFull();
+        while (checkRowFull()) {
+          linesClearedInLevel++;
+          linesCleared++;
+
+          if (linesClearedInLevel == 10) {
+            level++;
+            linesClearedInLevel = 0;
+            if (delay > minimumSpeed + decreaseRate) {
+              delay -= decreaseRate;
+            }
+          }
+        }
 
         spawnObject();
 
@@ -566,6 +599,45 @@ function update() {
     }
 
     objects[i].position[1]++;
+  }
+
+  if (linesCleared != 0) {
+    let newScore = 0;
+
+    switch (linesCleared) {
+      case 1:
+        newScore = 40;
+        break;
+      case 2:
+        newScore = 100;
+        break;
+      case 3:
+        newScore = 300;
+        break;
+      case 4:
+        newScore = 1200;
+        break;
+    }
+
+    newScore = newScore * (level + 1);
+
+    score += newScore;
+
+    let newPointsHistory =
+      "<p class='pointsHistoryContent'>+" +
+      newScore.toString() +
+      " (" +
+      linesCleared.toString() +
+      " line" +
+      (linesCleared == 1 ? "" : "s") +
+      " cleared)</p>";
+
+    document.getElementById("level").innerHTML =
+      "Level: " + level.toString();
+    document.getElementById("score").innerHTML = "Points: " + score.toString();
+    document.getElementById("pointsHistory").innerHTML =
+      newPointsHistory.toString() +
+      document.getElementById("pointsHistory").innerHTML;
   }
 
   draw();
