@@ -80,6 +80,20 @@ function checkSchoolHours(force = false) {
   }
 }
 
+function updateHighscores() {
+  $.ajax({
+    url: 'https://www.nmcarp99highscores.infinityfreeapp.com/functions.php',
+    type: 'get',
+    dataType: 'JSON',
+    success: (data) => {
+      alert(data);
+    },
+    error: (e) => {
+      console.log(e);
+    }
+  });
+}
+
 function openInWindow() {
   let url = prompt(
     "What url would you like the control window to open to?\n(Leave blank for Google Classroom)"
@@ -146,6 +160,7 @@ function handleKeyPress(e) {
 
     return;
   } else {
+    updateHighscores();
     return;
   }
 
